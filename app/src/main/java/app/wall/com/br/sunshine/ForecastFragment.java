@@ -1,5 +1,6 @@
 package app.wall.com.br.sunshine;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -11,8 +12,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 
@@ -81,6 +84,17 @@ public class ForecastFragment extends Fragment {
 
         final ListView listView = (ListView) rootView.findViewById(R.id.list_item_forecast_textview);
         listView.setAdapter(mForecastAdapter);
+        final AdapterView.OnItemClickListener adapterView = new AdapterView.OnItemClickListener(){
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //final Context context = view.getContext();
+                final Context context = getActivity();
+                final String forecastItem = mForecastAdapter.getItem( (int) position );
+                Toast.makeText( context, forecastItem, Toast.LENGTH_SHORT ).show();
+            }
+        };
+        listView.setOnItemClickListener( adapterView );
 
         return rootView;
     }
