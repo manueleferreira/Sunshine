@@ -1,9 +1,12 @@
 package app.wall.com.br.sunshine;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import org.json.JSONException;
 
@@ -57,12 +59,27 @@ public class ForecastFragment extends Fragment {
 
         if( id == R.id.action_refresh )
         {
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute("94043");
+            updateWeather();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    private void updateWeather() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String prefLocation = prefs.getString( getString( R.string.pref_location_key ),
+                getString(R.string.pref_location_default) );
+        String prefUnit = prefs.getString( getString( R.string.pref_unit_key ), getString( R.string.pref_unit_label ) );
+
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        weatherTask.execute(prefLocation, prefUnit);
     }
 
     @Override
@@ -90,8 +107,12 @@ public class ForecastFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 //final Context context = view.getContext();
                 final Context context = getActivity();
-                final String forecastItem = mForecastAdapter.getItem( (int) position );
-                Toast.makeText( context, forecastItem, Toast.LENGTH_SHORT ).show();
+                final String forecastItem = mForecastAdapter.getItem(position);
+
+
+                Intent showDetailActivityIntent = new Intent(context, DetailActivity.class);
+                showDetailActivityIntent.putExtra( Intent.EXTRA_TEXT, forecastItem );
+                startActivity(showDetailActivityIntent);
             }
         };
         listView.setOnItemClickListener( adapterView );
@@ -133,7 +154,6 @@ public class ForecastFragment extends Fragment {
             String forecastJsonStr = null;
 
             final String mode = "json";
-            final String unit = "metric";
             final int cnt = 7;
 
             try {
@@ -149,7 +169,7 @@ public class ForecastFragment extends Fragment {
                 Uri builder = Uri.parse(FORECAST_BASE_URL).buildUpon().
                         appendQueryParameter(QUERY_PARAM, params[0]).
                         appendQueryParameter(FORMAT_PARAM, mode).
-                        appendQueryParameter(UNITS_PARAM, unit).
+                        appendQueryParameter(UNITS_PARAM, params[1]).
                         appendQueryParameter(DAYS_PARAM, Integer.toString( cnt ) ).build();
                 URL url = new URL( builder.toString() );
 

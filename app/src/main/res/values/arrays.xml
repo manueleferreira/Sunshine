@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_list_options">
+        <item>Metric (Cº)</item>
+        <item>Imperial (Fº)</item>
+    </string-array>
+
+    <string-array name="pref_list_values">
+        <item>metric</item>
+        <item>imperial</item>
+    </string-array>
+    
+</resources>
